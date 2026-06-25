@@ -1,241 +1,206 @@
-// ─── Particle System ─────────────────────────────────────
-const canvas = document.getElementById('particle-canvas');
-const ctx = canvas.getContext('2d');
-let particles = [];
-let mouse = { x: null, y: null };
+/* ============================================================
+   Shehzaad Tinwala — Editorial Studio · interactions
+   ============================================================ */
+(function () {
+  "use strict";
 
-function resizeCanvas() {
-  if(!canvas) return;
-  canvas.width = window.innerWidth;
-  canvas.height = canvas.parentElement.offsetHeight;
-  initParticles();
-}
-window.addEventListener('resize', resizeCanvas);
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-class Particle {
-  constructor() { this.reset(true); }
-  reset(init) {
-    if(!canvas) return;
-    this.x = Math.random() * canvas.width;
-    this.y = init ? Math.random() * canvas.height : Math.random() * canvas.height;
-    this.size = Math.random() * 1.8 + 0.5;
-    this.speedX = (Math.random() - 0.5) * 0.4;
-    this.speedY = (Math.random() - 0.5) * 0.4;
-    this.opacity = Math.random() * 0.5 + 0.15;
-    this.color = Math.random() > 0.85 ? '247,209,255' : '165,231,255';
+  // ── Page-load entrance ───────────────────────────────────
+  requestAnimationFrame(() => document.body.classList.add("loaded"));
+
+  // ── Nav: solid-on-scroll + active section ────────────────
+  const nav = document.getElementById("nav");
+  const navLinks = Array.from(document.querySelectorAll(".nav-link"));
+  const sections = Array.from(document.querySelectorAll("main section[id], header[id]"));
+
+  const onScroll = () => {
+    if (nav) nav.classList.toggle("scrolled", window.scrollY > 24);
+  };
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+
+  if ("IntersectionObserver" in window && navLinks.length) {
+    const spy = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const id = entry.target.getAttribute("id");
+          navLinks.forEach((l) =>
+            l.classList.toggle("active", l.getAttribute("href") === "#" + id)
+          );
+        });
+      },
+      { rootMargin: "-45% 0px -50% 0px", threshold: 0 }
+    );
+    sections.forEach((s) => spy.observe(s));
   }
-  update() {
-    this.x += this.speedX;
-    this.y += this.speedY;
-    if (mouse.x !== null) {
-      const dx = mouse.x - this.x, dy = mouse.y - this.y;
-      const dist = Math.sqrt(dx*dx + dy*dy);
-      if (dist < 120) { this.x -= dx * 0.012; this.y -= dy * 0.012; }
-    }
-    if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset(false);
-  }
-  draw() {
-    ctx.fillStyle = `rgba(${this.color},${this.opacity})`;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-    ctx.fill();
-  }
-}
 
-// Draw lines between nearby particles
-function drawConnections() {
-  for (let i = 0; i < particles.length; i++) {
-    for (let j = i + 1; j < particles.length; j++) {
-      const dx = particles[i].x - particles[j].x;
-      const dy = particles[i].y - particles[j].y;
-      const dist = Math.sqrt(dx*dx + dy*dy);
-      if (dist < 100) {
-        ctx.strokeStyle = `rgba(165,231,255,${0.06 * (1 - dist/100)})`;
-        ctx.lineWidth = 0.5;
-        ctx.beginPath();
-        ctx.moveTo(particles[i].x, particles[i].y);
-        ctx.lineTo(particles[j].x, particles[j].y);
-        ctx.stroke();
-      }
-    }
-  }
-}
+  // ── Mobile menu ──────────────────────────────────────────
+  const menuBtn = document.getElementById("menu-btn");
+  const mobileMenu = document.getElementById("mobile-menu");
+  const setMenu = (open) => {
+    if (!mobileMenu || !menuBtn) return;
+    mobileMenu.classList.toggle("open", open);
+    menuBtn.setAttribute("aria-expanded", String(open));
+    menuBtn.textContent = open ? "Close" : "Menu";
+    document.body.style.overflow = open ? "hidden" : "";
+  };
+  if (menuBtn) menuBtn.addEventListener("click", () => setMenu(!mobileMenu.classList.contains("open")));
+  if (mobileMenu) mobileMenu.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => setMenu(false)));
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") setMenu(false); });
 
-function initParticles() {
-  if(!canvas) return;
-  particles = [];
-  const count = Math.min(Math.floor((canvas.width * canvas.height) / 12000), 120);
-  for (let i = 0; i < count; i++) particles.push(new Particle());
-}
-
-function animateParticles() {
-  if(!canvas) return;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  drawConnections();
-  particles.forEach(p => { p.update(); p.draw(); });
-  requestAnimationFrame(animateParticles);
-}
-
-if(canvas) {
-    resizeCanvas();
-    animateParticles();
-}
-
-
-// ─── Mouse Tracking ───────────────────────────────────────
-document.addEventListener('mousemove', (e) => {
-  mouse.x = e.clientX;
-  mouse.y = e.clientY;
-
-  // Floating badges parallax
-  if (window.matchMedia('(prefers-reduced-motion: no-preference)').matches) {
-    document.querySelectorAll('.animate-float').forEach((el, i) => {
-      const depth = (i + 1) * 12;
-      const mx = (e.clientX / window.innerWidth - 0.5) * depth;
-      const my = (e.clientY / window.innerHeight - 0.5) * depth;
-      el.style.setProperty('--tx', mx + 'px');
-      el.style.setProperty('--ty', my + 'px');
-      el.style.transform = `translate(var(--tx), var(--ty))`;
-    });
-  }
-});
-
-// ─── 3D Card Tilt ─────────────────────────────────────────
-document.querySelectorAll('.tilt-card').forEach(card => {
-  card.addEventListener('mousemove', (e) => {
-    if (!window.matchMedia('(prefers-reduced-motion: no-preference)').matches) return;
-    const rect = card.getBoundingClientRect();
-    const rx = -(e.clientY - rect.top - rect.height/2) / 15;
-    const ry =  (e.clientX - rect.left  - rect.width/2)  / 15;
-    card.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg) scale(1.02)`;
-    card.style.transition = 'transform 0.1s ease';
-  });
-  card.addEventListener('mouseleave', () => {
-    card.style.transform = 'perspective(800px) rotateX(0) rotateY(0) scale(1)';
-    card.style.transition = 'transform 0.5s cubic-bezier(0.2,0.8,0.2,1)';
-  });
-});
-
-// ─── Intersection Observer – reveals + skill bars ─────────
-const revealObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (!entry.isIntersecting) return;
-    entry.target.classList.add('visible');
-    revealObserver.unobserve(entry.target);
-  });
-}, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
-
-document.querySelectorAll('.reveal').forEach((el, i) => {
-  el.style.transitionDelay = el.style.transitionDelay || (i * 0.04) + 's';
-  revealObserver.observe(el);
-});
-
-// Skill bars
-const skillObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (!entry.isIntersecting) return;
-    entry.target.querySelectorAll('.skill-bar-fill').forEach(bar => {
-      bar.style.width = bar.dataset.width + '%';
-    });
-    // Circular progress
-    entry.target.querySelectorAll('.circle-fill').forEach(circle => {
-      const p = parseInt(circle.dataset.progress);
-      const circumference = 2 * Math.PI * 45;
-      circle.style.strokeDashoffset = circumference * (1 - p / 100);
-    });
-    skillObserver.unobserve(entry.target);
-  });
-}, { threshold: 0.3 });
-
-const skillsSection = document.getElementById('skills');
-if (skillsSection) skillObserver.observe(skillsSection);
-
-// Fix circle-wrap positions
-document.querySelectorAll('.circle-wrap').forEach(wrap => {
-  wrap.style.position = 'relative';
-  const inner = document.createElement('div');
-  inner.className = 'absolute inset-0 flex items-center justify-center';
-  const span = wrap.querySelector('span');
-  if (span) inner.appendChild(span);
-  wrap.appendChild(inner);
-});
-
-// ─── Active nav link on scroll ────────────────────────────
-const sections = document.querySelectorAll('section[id]');
-const navLinks = document.querySelectorAll('.nav-link');
-window.addEventListener('scroll', () => {
-  let current = '';
-  sections.forEach(section => {
-    if (window.scrollY >= section.offsetTop - 100) current = section.id;
-  });
-  navLinks.forEach(link => {
-    link.classList.remove('text-primary', 'border-b-2', 'border-primary', 'pb-1');
-    link.classList.add('text-on-surface-variant');
-    if (link.getAttribute('href') === '#' + current) {
-      link.classList.add('text-primary');
-      link.classList.remove('text-on-surface-variant');
-    }
-  });
-  // Navbar bg on scroll
-  const navbar = document.getElementById('navbar');
-  if (window.scrollY > 50) {
-    navbar.style.background = 'rgba(5,5,5,0.85)';
+  // ── Scroll reveals ───────────────────────────────────────
+  const reveals = Array.from(document.querySelectorAll(".reveal"));
+  if (reduceMotion || !("IntersectionObserver" in window)) {
+    reveals.forEach((el) => el.classList.add("visible"));
   } else {
-    navbar.style.background = 'rgba(19,19,19,0.1)';
+    const ro = new IntersectionObserver(
+      (entries, obs) => {
+        entries.forEach((entry, i) => {
+          if (!entry.isIntersecting) return;
+          entry.target.style.transitionDelay = Math.min(i * 60, 240) + "ms";
+          entry.target.classList.add("visible");
+          obs.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
+    );
+    reveals.forEach((el) => ro.observe(el));
   }
-}, { passive: true });
 
-// ─── Mobile Menu ──────────────────────────────────────────
-const menuToggle = document.getElementById('menu-toggle');
-if(menuToggle) {
-    menuToggle.addEventListener('click', () => {
-        document.getElementById('mobile-menu').classList.toggle('open');
+  // Skills are shown as grouped tags now — no animated meters.
+
+  // ── Project modal (opens from a project card's case-study trigger) ──
+  const modal = document.getElementById("project-modal");
+  if (modal) {
+    const mImg = document.getElementById("pm-img");
+    const mThumbs = document.getElementById("pm-thumbs");
+    const mCat = document.getElementById("pm-cat");
+    const mTitle = document.getElementById("pm-title");
+    const mStudy = document.getElementById("pm-study");
+    const mTags = document.getElementById("pm-tags");
+    const closeBtn = modal.querySelector(".pm-close");
+    let lastFocus = null, images = [], currentFallback = "", activeIdx = 0;
+
+    const showImage = (i) => {
+      activeIdx = i;
+      mImg.onerror = () => { mImg.onerror = null; if (currentFallback) mImg.src = currentFallback; };
+      mImg.src = images[i];
+      mThumbs.querySelectorAll(".pm-thumb").forEach((t, j) => t.classList.toggle("active", j === i));
+    };
+
+    const openProject = (card, trigger) => {
+      const eyebrow = card.querySelector(".eyebrow");
+      const studySrc = card.querySelector(".pm-study-src");
+      mCat.textContent = eyebrow ? eyebrow.textContent.trim() : "";
+      mTitle.textContent = card.querySelector(".pc-title").textContent;
+      // The modal shows a fuller case study authored separately from the card teaser.
+      mStudy.innerHTML = studySrc
+        ? studySrc.innerHTML
+        : (card.querySelector(".pc-problem") ? card.querySelector(".pc-problem").outerHTML : "");
+      mStudy.scrollTop = 0;
+      currentFallback = card.dataset.fallback || "";
+      mImg.alt = mTitle.textContent + " — project image";
+
+      mTags.innerHTML = "";
+      card.querySelectorAll(".pc-tags .tag").forEach((src) => {
+        const span = document.createElement("span");
+        span.className = "tag";
+        span.textContent = src.textContent;
+        mTags.appendChild(span);
+      });
+
+      images = (card.dataset.images || "").split(",").map((s) => s.trim()).filter(Boolean);
+      mThumbs.innerHTML = "";
+      if (images.length > 1) {
+        images.forEach((src, i) => {
+          const t = document.createElement("img");
+          t.className = "pm-thumb" + (i === 0 ? " active" : "");
+          t.src = src;
+          t.alt = "";
+          t.addEventListener("click", () => showImage(i));
+          mThumbs.appendChild(t);
+        });
+      }
+      showImage(0);
+
+      lastFocus = trigger || card;
+      modal.classList.add("open");
+      modal.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+      if (closeBtn) closeBtn.focus();
+    };
+
+    const closeModal = () => {
+      modal.classList.remove("open");
+      modal.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+      if (lastFocus) lastFocus.focus();
+    };
+
+    document.querySelectorAll("[data-case-study]").forEach((trigger) => {
+      trigger.addEventListener("click", (e) => {
+        const card = e.currentTarget.closest(".project-card");
+        if (card) openProject(card, e.currentTarget);
+      });
     });
-}
-
-document.querySelectorAll('#mobile-menu a').forEach(a => {
-  a.addEventListener('click', () => document.getElementById('mobile-menu').classList.remove('open'));
-});
-
-// ─── Portfolio Filter ─────────────────────────────────────
-document.querySelectorAll('.filter-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.filter-btn').forEach(b => {
-      b.classList.remove('active','bg-primary-container','text-on-primary-container');
-      b.classList.add('glass-card','text-on-surface-variant');
+    modal.querySelectorAll("[data-close]").forEach((el) => el.addEventListener("click", closeModal));
+    document.addEventListener("keydown", (e) => {
+      if (!modal.classList.contains("open")) return;
+      if (e.key === "Escape") closeModal();
+      else if (e.key === "ArrowRight" && images.length > 1) showImage((activeIdx + 1) % images.length);
+      else if (e.key === "ArrowLeft" && images.length > 1) showImage((activeIdx - 1 + images.length) % images.length);
     });
-    btn.classList.add('active','bg-primary-container','text-on-primary-container');
-    btn.classList.remove('glass-card','text-on-surface-variant');
+  }
 
-    const filter = btn.dataset.filter;
-    document.querySelectorAll('.portfolio-item').forEach(item => {
-      if (filter === 'all' || item.dataset.cat === filter) {
-        item.style.display = 'block';
-        item.style.opacity = '0';
-        setTimeout(() => { item.style.transition = 'opacity 0.4s'; item.style.opacity = '1'; }, 50);
-      } else {
-        item.style.transition = 'opacity 0.3s';
-        item.style.opacity = '0';
-        setTimeout(() => { item.style.display = 'none'; }, 300);
+  // ── Contact form → POST /api/contact (single handler) ────
+  const form = document.getElementById("contact-form");
+  if (form) {
+    const btn = document.getElementById("cf-submit");
+    const status = document.getElementById("cf-status");
+    const setStatus = (msg, color) => {
+      if (!status) return;
+      status.textContent = msg;
+      status.style.color = color || "";
+    };
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(form).entries());
+
+      if (!data.name || !data.email || !data.message) {
+        setStatus("Please fill in your name, email and message.", "#FF7A7A");
+        return;
+      }
+
+      const label = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = "Sending…";
+      setStatus("", "");
+
+      try {
+        const res = await fetch("/api/contact", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        if (res.ok) {
+          form.reset();
+          btn.innerHTML = "Sent ✓";
+          setStatus("Thanks — I'll get back to you within 24 hours.", "#5772FF");
+        } else {
+          throw new Error("bad status");
+        }
+      } catch (err) {
+        btn.innerHTML = "Try again";
+        setStatus("Something went wrong. Email me directly at tinwalashehzaad@gmail.com.", "#FF7A7A");
+      } finally {
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.innerHTML = label;
+        }, 2600);
       }
     });
-  });
-});
-
-// ─── Contact Form ─────────────────────────────────────────
-const contactForm = document.getElementById('contact-form');
-if(contactForm) {
-    contactForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const btn = e.target.querySelector('button[type=submit]');
-        btn.innerHTML = '<i class="fas fa-check"></i> Message Sent!';
-        btn.classList.add('opacity-80');
-        btn.disabled = true;
-        setTimeout(() => {
-        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
-        btn.classList.remove('opacity-80');
-        btn.disabled = false;
-        e.target.reset();
-        }, 3000);
-    });
-}
+  }
+})();

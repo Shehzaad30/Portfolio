@@ -1,38 +1,25 @@
+/* Editorial Studio — design tokens */
 tailwind.config = {
-  darkMode:"class",
-  theme:{
-    extend:{
-      colors:{
-        "tertiary":"#f7d1ff","on-surface":"#e5e2e1","inverse-primary":"#00677f",
-        "on-secondary-fixed":"#00201d","inverse-on-surface":"#313030","outline-variant":"#3c494e",
-        "secondary":"#ffffff","surface-container-low":"#1c1b1b","primary":"#a5e7ff",
-        "outline":"#859399","on-background":"#e5e2e1","on-tertiary":"#520070",
-        "on-error":"#690005","surface-tint":"#47d6ff","surface-container":"#201f1f",
-        "on-tertiary-fixed-variant":"#6e208c","on-tertiary-container":"#772b95",
-        "surface-bright":"#3a3939","on-primary":"#003543","surface-container-lowest":"#0e0e0e",
-        "on-primary-container":"#00566a","primary-fixed":"#b6ebff","primary-fixed-dim":"#47d6ff",
-        "on-primary-fixed-variant":"#004e60","surface":"#131313","surface-dim":"#131313",
-        "tertiary-fixed-dim":"#edb1ff","on-secondary-container":"#00716a","error":"#ffb4ab",
-        "secondary-container":"#00fdee","surface-container-high":"#2a2a2a","on-primary-fixed":"#001f28",
-        "surface-container-highest":"#353534","on-surface-variant":"#bbc9cf","surface-variant":"#353534",
-        "inverse-surface":"#e5e2e1","background":"#131313","primary-container":"#00d2ff",
-        "error-container":"#93000a","tertiary-fixed":"#f9d8ff","tertiary-container":"#eaaaff"
+  theme: {
+    extend: {
+      colors: {
+        paper: "#FAFAF8",
+        panel: "#F2F1EC",
+        ink: "#141414",
+        "ink-deep": "#0D0D0D",
+        muted: "#6E6A63",
+        line: "#E3E1DA",
+        cobalt: "#1B3CFF",
+        "cobalt-bright": "#5772FF"
       },
-      borderRadius:{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},
-      spacing:{"unit":"8px","stack-lg":"80px","gutter":"24px","container-max":"1280px","stack-md":"32px","margin-mobile":"20px","stack-sm":"16px"},
-      fontFamily:{
-        "code-sm":["JetBrains Mono"],"label-caps":["Geist"],"body-md":["Inter"],"body-lg":["Inter"],
-        "headline-md":["Geist"],"display-lg":["Geist"],"display-lg-mobile":["Geist"]
+      fontFamily: {
+        display: ['"Clash Display"', "Georgia", "sans-serif"],
+        serif: ['"Newsreader"', "Georgia", "serif"],
+        mono: ['"IBM Plex Mono"', "ui-monospace", "monospace"]
       },
-      fontSize:{
-        "code-sm":["14px",{"lineHeight":"1.4","fontWeight":"400"}],
-        "label-caps":["12px",{"lineHeight":"1","letterSpacing":"0.1em","fontWeight":"700"}],
-        "body-md":["16px",{"lineHeight":"1.5","fontWeight":"400"}],
-        "body-lg":["18px",{"lineHeight":"1.6","fontWeight":"400"}],
-        "headline-md":["32px",{"lineHeight":"1.3","letterSpacing":"-0.01em","fontWeight":"600"}],
-        "display-lg":["72px",{"lineHeight":"1.1","letterSpacing":"-0.04em","fontWeight":"800"}],
-        "display-lg-mobile":["40px",{"lineHeight":"1.2","letterSpacing":"-0.02em","fontWeight":"800"}]
+      maxWidth: {
+        container: "1240px"
       }
     }
   }
-}
+};

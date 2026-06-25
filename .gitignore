@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Environment / secrets
+.env
+*.env
+
+# Editor / tooling
+.claude/
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# AttendX screenshots that contain real student/faculty PII — not used on the site, keep out of the public repo
+static/assets/images/portfolio/attendx-faculty.png
+static/assets/images/portfolio/attendx-report.png
+static/assets/images/portfolio/attendx-students.png
