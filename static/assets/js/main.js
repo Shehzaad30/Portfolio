@@ -180,17 +180,18 @@
       setStatus("", "");
 
       try {
-        const res = await fetch("/api/contact", {
+        const res = await fetch("https://api.web3forms.com/submit", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", "Accept": "application/json" },
           body: JSON.stringify(data),
         });
-        if (res.ok) {
+        const json = await res.json().catch(() => ({}));
+        if (res.ok && json.success) {
           form.reset();
           btn.innerHTML = "Sent ✓";
           setStatus("Thanks — I'll get back to you within 24 hours.", "#5772FF");
         } else {
-          throw new Error("bad status");
+          throw new Error(json.message || "bad status");
         }
       } catch (err) {
         btn.innerHTML = "Try again";
