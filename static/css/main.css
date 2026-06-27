@@ -109,7 +109,8 @@ img { max-width: 100%; display: block; }
   letter-spacing: -0.01em;
 }
 .wordmark .period { color: var(--cobalt); }
-.nav-links { display: flex; align-items: center; gap: 2rem; }
+.nav-links { display: none; align-items: center; gap: 2rem; }
+@media (min-width: 768px) { .nav-links { display: flex; } }
 .nav-link {
   font-family: "IBM Plex Mono", monospace;
   font-size: 12px;
