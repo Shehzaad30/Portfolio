@@ -1,0 +1,38 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ 'Edit' if cloth else 'Add' }} cloth{% endblock %}
+{% block content %}
+<div class="admin-form-card">
+  <h1>{{ 'Edit' if cloth else 'Add a' }} cloth item</h1>
+  <form method="POST" enctype="multipart/form-data" novalidate>
+    {{ form.hidden_tag() }}
+    <label>{{ form.name.label }}
+      {{ form.name() }}
+      {% for error in form.name.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+    </label>
+    <div class="admin-form-row">
+      <label>{{ form.category.label }} {{ form.category() }}</label>
+      <label>{{ form.price.label }} {{ form.price() }}</label>
+    </div>
+    <div class="admin-form-row">
+      <label>{{ form.size.label }} {{ form.size(placeholder="M, 32, One size...") }}</label>
+      <label>{{ form.color.label }} {{ form.color() }}</label>
+    </div>
+    <label>{{ form.description.label }}
+      {{ form.description(rows=4) }}
+    </label>
+    <label>{{ form.image.label }}
+      {{ form.image() }}
+      {% for error in form.image.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+    </label>
+    {% if cloth and cloth.image_filename %}
+      <p class="admin-current-photo">Current photo:
+        <img src="{{ url_for('static', filename='uploads/clothes/' ~ cloth.image_filename) }}" alt="" />
+      </p>
+    {% endif %}
+    <div class="admin-form-actions">
+      <button class="btn" type="submit">{{ 'Save changes' if cloth else 'Add cloth' }}</button>
+      <a class="btn btn-ghost" href="{{ url_for('admin.dashboard') }}">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -19,6 +19,11 @@ env/
 .DS_Store
 Thumbs.db
 
+# Admin panel: local SQLite DB and uploaded cloth photos
+instance/
+static/uploads/clothes/*
+!static/uploads/clothes/.gitkeep
+
 # AttendX screenshots that contain real student/faculty PII — not used on the site, keep out of the public repo
 static/assets/images/portfolio/attendx-faculty.png
 static/assets/images/portfolio/attendx-report.png
